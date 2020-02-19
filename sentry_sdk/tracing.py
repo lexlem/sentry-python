@@ -101,6 +101,7 @@ class Span(object):
         "op",
         "description",
         "start_timestamp",
+        "_start_timestamp_monotonic",
         "timestamp",
         "_tags",
         "_data",
@@ -134,6 +135,14 @@ class Span(object):
         self._tags = {}  # type: Dict[str, str]
         self._data = {}  # type: Dict[str, Any]
         self.start_timestamp = datetime.utcnow()
+        try:
+            # TODO: For Python 3.7+, we could use a clock with ns resolution:
+            # self._start_timestamp_monotonic = time.perf_counter_ns()
+
+            # Python 3.3+
+            self._start_timestamp_monotonic = time.perf_counter()
+        except AttributeError:
+            self._start_timestamp_monotonic = self.start_timestamp
 
         #: End timestamp of span
         self.timestamp = None  # type: Optional[datetime]
@@ -309,7 +318,11 @@ class Span(object):
             # This transaction is already finished, so we should not flush it again.
             return None
 
-        self.timestamp = datetime.utcnow()
+        try:
+            durationSeconds = time.perf_counter() - self._start_timestamp_monotonic
+            self.timestamp = self.start_timestamp + durationSeconds
+        except AttributeError:
+            self.timestamp = datetime.utcnow()
 
         _maybe_create_breadcrumbs_from_span(hub, self)
 
