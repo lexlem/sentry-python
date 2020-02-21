@@ -90,6 +90,7 @@ class _SpanRecorder(object):
         self.finished_spans.append(span)
 
 
+# TODO: look into ContextDecorator, to make this both a context manager and decorator.
 class Span(object):
     __slots__ = (
         "trace_id",
@@ -134,7 +135,7 @@ class Span(object):
         self.hub = hub
         self._tags = {}  # type: Dict[str, str]
         self._data = {}  # type: Dict[str, Any]
-        self.start_timestamp = datetime.utcnow()
+        self.start_timestamp = datetime.now(timezone.utc)
         try:
             # TODO: For Python 3.7+, we could use a clock with ns resolution:
             # self._start_timestamp_monotonic = time.perf_counter_ns()

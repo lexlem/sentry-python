@@ -256,7 +256,7 @@ def serialize(event, **kwargs):
 
         elif isinstance(obj, datetime):
             return (
-                text_type(obj.strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
+                text_type(obj.strftime("%Y-%m-%dT%H:%M:%S.%fZ"))  # TODO: Handle timezone; handle ns resolution
                 if not should_repr_strings
                 else safe_repr(obj)
             )
